@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Member</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-container">
+
+<h2>Add Insurance Member</h2>
+
+<form action="/add-member" method="POST">
+
+<input type="text"
+name="name"
+placeholder="Member Name"
+required>
+
+<input type="text"
+name="mobile"
+placeholder="Mobile Number"
+required>
+
+<input type="number"
+name="age"
+placeholder="Age"
+required>
+
+<select name="gender">
+<option>Male</option>
+<option>Female</option>
+</select>
+
+<input type="text"
+name="relationship"
+placeholder="Relationship"
+required>
+
+<button type="submit">
+Add Member
+</button>
+
+</form>
+
+</div>
+
+</body>
+</html>
