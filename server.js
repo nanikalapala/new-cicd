@@ -15,11 +15,25 @@ app.post("/login", (req, res) => {
 
     const { email, password } = req.body;
 
-    if(email === "admin@insurance.com" && password === "admin123"){
-        res.send("Login Successful");
+    if (
+        email === "admin@insurance.com" &&
+        password === "admin123"
+    ) {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "public",
+                "dashboard.html"
+            )
+        );
+
     } else {
+
         res.send("Invalid Credentials");
+
     }
+
 });
 
 app.listen(3000, () => {

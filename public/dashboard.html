@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Insurance Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dashboard">
+
+    <h1>Welcome to Insurance Portal</h1>
+
+    <div class="card">
+        <h3>Policy Details</h3>
+        <p>Policy Number: INS-1001</p>
+        <p>Policy Type: Health Insurance</p>
+        <p>Status: Active</p>
+    </div>
+
+    <div class="card">
+        <h3>Premium Details</h3>
+        <p>Premium Amount: ₹2500</p>
+        <p>Next Due Date: 15-Jul-2026</p>
+    </div>
+
+    <div class="card">
+        <h3>Claim Status</h3>
+        <p>No Claims Submitted</p>
+    </div>
+
+    <button onclick="logout()">Logout</button>
+
+</div>
+
+<script>
+function logout() {
+    window.location.href="/";
+}
+</script>
+
+</body>
+</html>
