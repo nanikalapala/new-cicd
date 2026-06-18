@@ -50,10 +50,10 @@ jobs:
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/insurance-app:latest
 
-            docker stop insurance-app-prod || true
-            docker rm insurance-app-prod || true
+            docker stop insurance-app || true
+            docker rm insurance-app || true
 
             docker run -d \
-              --name insurance-app-prod \
-              -p 3000:3000 \
+              --name insurance-app \
+              -p 80:3000 \
               ${{ secrets.DOCKER_USERNAME }}/insurance-app:latest
