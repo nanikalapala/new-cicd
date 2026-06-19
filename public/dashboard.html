@@ -298,5 +298,163 @@ borderRadius:8
 });
 </script>
 
+<!-- AI Concierge Button -->
+
+<div class="ai-concierge-btn" onclick="openAIConcierge()">
+🤖 AI Concierge
+</div>
+
+<!-- AI Concierge Window -->
+
+<div class="ai-concierge" id="aiConcierge">
+
+<div class="ai-header">
+
+<h3>Insurance AI Concierge</h3>
+
+<button onclick="closeAIConcierge()">✖</button>
+
+</div>
+
+<div class="ai-body" id="chatBody">
+
+<div class="ai-message">
+👋 Hello Brahma Teja
+
+<br><br>
+
+I can help with:
+
+<ul>
+<li>Policies</li>
+<li>Claims</li>
+<li>Customers</li>
+<li>Premium Reports</li>
+<li>Insurance Analytics</li>
+</ul>
+
+</div>
+
+</div>
+
+<div class="ai-controls">
+
+<input
+type="text"
+id="userMessage"
+placeholder="Ask me anything...">
+
+<button onclick="sendMessage()">
+Send
+</button>
+
+<button onclick="startVoice()">
+🎤
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+function openAIConcierge(){
+document.getElementById("aiConcierge").style.display="flex";
+}
+
+function closeAIConcierge(){
+document.getElementById("aiConcierge").style.display="none";
+}
+
+function sendMessage(){
+
+const input =
+document.getElementById("userMessage");
+
+const chat =
+document.getElementById("chatBody");
+
+if(input.value==="") return;
+
+chat.innerHTML += `
+<div class="user-message">
+${input.value}
+</div>
+`;
+
+let reply="";
+
+const msg =
+input.value.toLowerCase();
+
+if(msg.includes("policy")){
+reply="Total Policies : 1245";
+}
+
+else if(msg.includes("claim")){
+reply="Total Claims : 256";
+}
+
+else if(msg.includes("customer")){
+reply="Total Customers : 2341";
+}
+
+else if(msg.includes("premium")){
+reply="Today's Premium Collection : ₹85,000";
+}
+
+else if(msg.includes("pending")){
+reply="Pending Claims : 12";
+}
+
+else if(msg.includes("active")){
+reply="Active Policies : 987";
+}
+
+else{
+reply="I can help with policies, claims, customers, premiums and reports.";
+}
+
+chat.innerHTML += `
+<div class="ai-message">
+${reply}
+</div>
+`;
+
+input.value="";
+
+chat.scrollTop =
+chat.scrollHeight;
+}
+
+function startVoice(){
+
+if(!('webkitSpeechRecognition' in window)){
+alert("Voice recognition not supported.");
+return;
+}
+
+const recognition =
+new webkitSpeechRecognition();
+
+recognition.lang='en-US';
+
+recognition.onresult =
+function(event){
+
+const speech =
+event.results[0][0].transcript;
+
+document.getElementById(
+"userMessage"
+).value = speech;
+
+sendMessage();
+}
+
+recognition.start();
+}
+
+</script>
 </body>
 </html>
