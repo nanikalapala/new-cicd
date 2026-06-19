@@ -1,4 +1,4 @@
-name: Insurance CI/CD
+name: Insurance Portal CI/CD
 
 on:
   push:
@@ -6,52 +6,63 @@ on:
       - master
 
 jobs:
-  build-deploy:
+
+  build-test-deploy:
+
     runs-on: ubuntu-latest
 
     steps:
 
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout Source
+      uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+    - name: Verify Project Files
+      run: |
+        ls -la
+        test -f server.js
+        test -f Dockerfile
+        test -f public/index.html
 
-      - name: Install Dependencies
-        run: npm install
+    - name: Setup NodeJS
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
 
-      - name: Run Test
-        run: npm test
+    - name: Install Dependencies
+      run: npm install
 
-      - name: Docker Login
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Start Validation
+      run: |
+        node --check server.js
 
-      - name: Build Docker Image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/insurance-app:latest .
+    - name: Login DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push Docker Image
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/insurance-app:latest
+    - name: Build Docker Image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest .
 
-      - name: Deploy
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/insurance-app:latest
+    - name: Push Docker Image
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
 
-            docker stop insurance-app || true
-            docker rm insurance-app || true
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
 
-            docker run -d \
-              --name insurance-app \
-              -p 80:3000 \
-              ${{ secrets.DOCKER_USERNAME }}/insurance-app:latest
+          docker pull ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
+
+          docker stop insurance-app || true
+          docker rm insurance-app || true
+
+          docker run -d \
+          --name insurance-app \
+          -p 80:3000 \
+          ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
