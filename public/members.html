@@ -1,52 +1,70 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Members</title>
-<link rel="stylesheet" href="/pages.css">
-</head>
-<body>
+<link rel="stylesheet" href="/members.css">
+<div class="member-form">
 
-<div class="page-container">
+    <h2>Add New Member</h2>
 
-<h1>Members Management</h1>
+    <form action="/add-member" method="POST">
 
-<div class="card">
+        <input
+        type="text"
+        name="fullname"
+        placeholder="Full Name"
+        required>
 
-<h2>Add New Member</h2>
+        <input
+        type="email"
+        name="email"
+        placeholder="Email"
+        required>
 
-<form>
+        <input
+        type="text"
+        name="phone"
+        placeholder="Phone Number"
+        required>
 
-<input type="text" placeholder="Full Name">
+        <input
+        type="text"
+        name="policy_type"
+        placeholder="Policy Type"
+        required>
 
-<input type="email" placeholder="Email">
+        <button type="submit">
+            Add Member
+        </button>
 
-<input type="text" placeholder="Phone Number">
-
-<input type="text" placeholder="Policy Type">
-
-<form action="/add-member" method="POST">
-
-<input name="fullname" placeholder="Full Name">
-
-<input name="email" placeholder="Email">
-
-<input name="phone" placeholder="Phone">
-
-<input name="policy_type" placeholder="Policy Type">
-
-<button>Add Member</button>
-
-</form>
-
-<button type="submit">
-Add Member
-</button>
-
-</form>
+    </form>
 
 </div>
 
-</div>
+<div class="member-table">
 
-</body>
-</html>
+    <h2>Member Records</h2>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Policy</th>
+            </tr>
+        </thead>
+
+        <tbody id="memberData">
+
+            <tr>
+                <td>1</td>
+                <td>John Doe</td>
+                <td>john@gmail.com</td>
+                <td>9876543210</td>
+                <td>Health Insurance</td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>

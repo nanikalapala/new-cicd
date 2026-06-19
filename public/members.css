@@ -1,0 +1,52 @@
+.member-form,
+.member-table{
+    background:#fff;
+    padding:25px;
+    border-radius:15px;
+    margin-bottom:20px;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+.member-form h2,
+.member-table h2{
+    margin-bottom:20px;
+}
+
+.member-form input{
+    width:100%;
+    padding:14px;
+    margin-bottom:15px;
+    border:1px solid #ddd;
+    border-radius:10px;
+}
+
+.member-form button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.member-form button:hover{
+    background:#1d4ed8;
+}
+
+.member-table table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.member-table th,
+.member-table td{
+    padding:15px;
+    border-bottom:1px solid #eee;
+    text-align:left;
+}
+
+.member-table th{
+    background:#f8fafc;
+}
