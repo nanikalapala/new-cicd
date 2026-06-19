@@ -1,49 +1,301 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Insurance Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Insurance Dashboard</title>
+
+<link rel="stylesheet" href="/dashboard.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </head>
+
 <body>
 
-<div class="dashboard">
+<div class="dashboard-container">
 
-    <h1>Welcome to Insurance Portal</h1>
+    <div class="sidebar">
 
-    <div class="card">
-        <h3>Policy Details</h3>
-        <p>Policy Number: INS-1001</p>
-        <p>Policy Type: Health Insurance</p>
-        <p>Status: Active</p>
+        <div>
+
+            <div class="logo">
+                <i class="fa-solid fa-shield-heart"></i>
+                <span>Insurance Portal</span>
+            </div>
+
+            <a href="/dashboard" class="active">
+                <i class="fa-solid fa-house"></i>
+                Dashboard
+            </a>
+
+            <a href="/policies">
+                <i class="fa-solid fa-file-shield"></i>
+                Policies
+            </a>
+
+            <a href="/claims">
+                <i class="fa-solid fa-file-circle-check"></i>
+                Claims
+            </a>
+
+            <a href="/members">
+                <i class="fa-solid fa-users"></i>
+                Customers
+            </a>
+
+            <a href="#">
+                <i class="fa-solid fa-file-lines"></i>
+                Reports
+            </a>
+
+        </div>
+
+        <div class="sidebar-bottom">
+
+            <a href="/settings">
+                <i class="fa-solid fa-gear"></i>
+                Settings
+            </a>
+
+            <a href="/">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Logout
+            </a>
+
+        </div>
+
     </div>
 
-    <div class="card">
-        <h3>Premium Details</h3>
-        <p>Premium Amount: ₹2500</p>
-        <p>Next Due Date: 15-Jul-2026</p>
+    <div class="main-content">
+
+        <div class="topbar">
+
+            <div>
+                <h1>Namaste</h1>
+                <p>Welcome back Brahma Teja</p>
+            </div>
+
+            <input
+            type="text"
+            placeholder="Search policy, claim..."
+            class="search-box">
+
+            <div class="profile">
+
+                <div class="notification-box">
+
+                    <i class="fa-solid fa-bell notification"></i>
+
+                    <span class="badge">3</span>
+
+                </div>
+
+                <div class="avatar">
+                    A
+                </div>
+
+                <span>Admin</span>
+
+            </div>
+
+        </div>
+
+        <div class="cards">
+
+            <div class="card">
+                <div class="card-icon blue">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
+                <div>
+                    <h4>Total Policies</h4>
+                    <h2>1,245</h2>
+                    <a href="#">View all</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-icon green">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h4>Active Policies</h4>
+                    <h2>987</h2>
+                    <a href="#">View all</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-icon orange">
+                    <i class="fa-solid fa-file-circle-check"></i>
+                </div>
+                <div>
+                    <h4>Total Claims</h4>
+                    <h2>256</h2>
+                    <a href="#">View all</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-icon purple">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <h4>Total Customers</h4>
+                    <h2>2,341</h2>
+                    <a href="#">View all</a>
+                </div>
+            </div>
+
+        </div>
+          
+	<!-- Activity Logs -->
+
+<div class="activity-logs">
+
+    <h3>System Activity Logs</h3>
+
+    <div class="log-item">
+        <span class="log-time">10:15 AM</span>
+        <span>Total Policies updated to <b>1245</b></span>
     </div>
 
-    <div class="card">
-        <h3>Claim Status</h3>
-        <p>No Claims Submitted</p>
+    <div class="log-item">
+        <span class="log-time">10:25 AM</span>
+        <span>Active Policies count reached <b>987</b></span>
     </div>
-    
-    <button onclick="window.location.href='/add-member'">
-    Add Member
-    </button>
 
-    <button onclick="window.location.href='/members'">
-    View Members
-    </button>
+    <div class="log-item">
+        <span class="log-time">10:45 AM</span>
+        <span>New Claim registered. Total Claims: <b>256</b></span>
+    </div>
 
-    <button onclick="logout()">Logout</button>
+    <div class="log-item">
+        <span class="log-time">11:00 AM</span>
+        <span>Customer database updated. Total Customers: <b>2341</b></span>
+    </div>
+
+    <div class="log-item">
+        <span class="log-time">11:15 AM</span>
+        <span>Today's Premium Collection reached <b>₹85,000</b></span>
+    </div>
+
+    <div class="log-item">
+        <span class="log-time">11:20 AM</span>
+        <span>New Policies added today: <b>23</b></span>
+    </div>
+
+    <div class="log-item">
+        <span class="log-time">11:30 AM</span>
+        <span>Pending Claims currently: <b>12</b></span>
+    </div>
 
 </div>
 
+        <div class="dashboard-grid">
+
+            <div class="recent-claims">
+
+                <h3>Recent Claims</h3>
+
+                <table>
+
+                    <tr>
+                        <th>Claim ID</th>
+                        <th>Customer</th>
+                        <th>Policy Number</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+
+                    <tr>
+                        <td>CLM1001</td>
+                        <td>John Doe</td>
+                        <td>POL123456</td>
+                        <td>2024-05-20</td>
+                        <td><span class="approved">Approved</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>CLM1002</td>
+                        <td>Jane Smith</td>
+                        <td>POL123457</td>
+                        <td>2024-05-19</td>
+                        <td><span class="pending">Pending</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>CLM1003</td>
+                        <td>Robert Brown</td>
+                        <td>POL123458</td>
+                        <td>2024-05-18</td>
+                        <td><span class="rejected">Rejected</span></td>
+                    </tr>
+
+                </table>
+
+            </div>
+
+            <div class="quick-actions">
+
+                <h3>Quick Actions</h3>
+
+                <button>
+                    <i class="fa-solid fa-file-circle-plus"></i>
+                    Add New Policy
+                </button>
+
+                <button>
+                    <i class="fa-solid fa-file-circle-check"></i>
+                    Register New Claim
+                </button>
+
+                <button>
+                    <i class="fa-solid fa-user-plus"></i>
+                    Add New Customer
+                </button>
+
+                <button>
+                    <i class="fa-solid fa-file-pdf"></i>
+                    Generate Report
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="chart-card">
+
+            <h3>Monthly Premium Collection</h3>
+
+            <canvas id="premiumChart"></canvas>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-function logout() {
-    window.location.href="/";
+new Chart(
+document.getElementById('premiumChart'),
+{
+type:'bar',
+data:{
+labels:['Jan','Feb','Mar','Apr','May','Jun'],
+datasets:[{
+label:'Premium Collection',
+data:[120,150,180,170,200,240],
+backgroundColor:'#2563eb',
+borderRadius:8
+}]
 }
+});
 </script>
 
 </body>

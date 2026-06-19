@@ -6,17 +6,15 @@ on:
       - master
 
 jobs:
-
-  build-test-deploy:
-
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
 
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup NodeJS
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -24,7 +22,7 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run Tests
+      - name: Run Test
         run: npm test
 
       - name: Docker Login
@@ -41,7 +39,7 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/insurance-app:latest
 
-      - name: Deploy To Server
+      - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}

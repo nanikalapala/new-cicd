@@ -1,13 +1,15 @@
 {
   "name": "insurance-app",
   "version": "1.0.0",
+  "description": "Insurance Management Portal",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Test Passed\""
+    "test": "echo \"Tests Passed\""
   },
   "dependencies": {
-    "body-parser": "^1.20.2",
-    "express": "^4.18.2"
+    "bcrypt": "^6.0.0",
+    "express": "^4.19.2",
+    "mysql2": "^3.14.1"
   }
 }
