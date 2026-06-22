@@ -136,37 +136,3 @@ jobs:
             echo "Verifying container health..."
             sleep 5
             docker ps | grep insurance-app && echo "✓ Container is running successfully"
-
-  notify-deployment:
-    needs: deploy-to-ec2
-    runs-on: ubuntu-latest
-    name: Notify Deployment Status
-    if: always()
-    steps:
-      - name: Deployment Status
-        run: |
-          if [ "${{ needs.deploy-to-ec2.result }}" == "success" ]; then
-            echo "✓ Deployment completed successfully!"
-          else
-            echo "✗ Deployment failed!"
-            exit 1
-          fi
-
-      - name: Slack Notification (Optional)
-        if: always()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
-          payload: |
-            {
-              "text": "Insurance Portal Deployment ${{ needs.deploy-to-ec2.result == 'success' && '✓ SUCCESS' || '✗ FAILED' }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Insurance Portal CI/CD*\nBranch: ${{ github.ref }}\nCommit: ${{ github.sha }}\nStatus: ${{ needs.deploy-to-ec2.result == 'success' && '✓ SUCCESS' || '✗ FAILED' }}"
-                  }
-                }
-              ]
-            }
