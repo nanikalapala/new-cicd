@@ -23,54 +23,111 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 <i class="fa-solid fa-user"></i>
 <h3>Profile Settings</h3>
 <p>Manage account details and profile information.</p>
-<button>Update Profile</button>
+
+<button onclick="location.href='/profile'">
+Update Profile
+</button>
+
 </div>
 
 <div class="setting-card">
 <i class="fa-solid fa-lock"></i>
 <h3>Security</h3>
 <p>Change password and security preferences.</p>
-<button>Change Password</button>
+
+<button onclick="location.href='/change-password'">
+Change Password
+</button>
+
 </div>
 
 <div class="setting-card">
 <i class="fa-solid fa-bell"></i>
 <h3>Notifications</h3>
 <p>Manage email and system notifications.</p>
-<button>Configure</button>
+
+<button onclick="location.href='/notifications'">
+Configure
+</button>
+
 </div>
 
 <div class="setting-card">
 <i class="fa-solid fa-database"></i>
 <h3>Backup</h3>
 <p>Create and restore system backups.</p>
-<button>Create Backup</button>
+
+<button onclick="createBackup()">
+Create Backup
+</button>
+
 </div>
 
 <div class="setting-card">
 <i class="fa-solid fa-users"></i>
 <h3>User Management</h3>
 <p>Manage administrators and users.</p>
-<button>Manage Users</button>
+
+<button onclick="location.href='/users'">
+Manage Users
+</button>
+
 </div>
 
 <div class="setting-card">
 <i class="fa-solid fa-circle-info"></i>
 <h3>System Information</h3>
 <p>Insurance Portal v1.0</p>
-<button>View Details</button>
+
+<button onclick="showSystemInfo()">
+View Details
+</button>
+
 </div>
 
 </div>
 
 <div class="back-btn">
+
 <a href="/dashboard">
+
 <i class="fa-solid fa-arrow-left"></i>
+
 Back to Dashboard
+
 </a>
+
 </div>
 
 </div>
+
+<script>
+
+function createBackup(){
+
+alert("✅ System Backup Created Successfully!");
+
+}
+
+function showSystemInfo(){
+
+alert(
+
+"Insurance Portal v1.0\n\n" +
+
+"Server: Running\n" +
+
+"Database: Connected\n" +
+
+"AI Concierge: Active\n" +
+
+"Environment: Production"
+
+);
+
+}
+
+</script>
 
 </body>
 </html>

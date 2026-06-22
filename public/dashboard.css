@@ -485,3 +485,55 @@ border-radius:8px;
 cursor:pointer;
 
 }
+
+/* Notification Popup */
+
+.notification-popup{
+display:none;
+position:fixed;
+top:80px;
+right:140px;
+width:260px;
+background:#fff;
+padding:15px;
+border-radius:12px;
+box-shadow:0 5px 20px rgba(0,0,0,.15);
+z-index:9999;
+}
+
+.notification-popup h4{
+margin-bottom:10px;
+}
+
+.notification-popup p{
+padding:8px 0;
+border-bottom:1px solid #eee;
+font-size:14px;
+}
+
+/* Admin Menu */
+
+.admin-menu{
+display:none;
+position:fixed;
+top:80px;
+right:20px;
+width:180px;
+background:#fff;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 5px 20px rgba(0,0,0,.15);
+z-index:9999;
+}
+
+.admin-menu a{
+display:block;
+padding:12px 15px;
+text-decoration:none;
+color:#333;
+font-size:14px;
+}
+
+.admin-menu a:hover{
+background:#f5f7fb;
+}

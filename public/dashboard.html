@@ -82,25 +82,23 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
             <input
             type="text"
             placeholder="Search policy, claim..."
-            class="search-box">
+            class="search-box"
+            id="dashboardSearch">
 
             <div class="profile">
 
-                <div class="notification-box">
-
+                <div class="notification-box" onclick="toggleNotifications()">
                     <i class="fa-solid fa-bell notification"></i>
-
                     <span class="badge">3</span>
-
                 </div>
 
-                <div class="avatar">
-                    A
+                <div class="avatar" onclick="toggleAdminMenu()">
+                   A
                 </div>
 
-                <span>Admin</span>
+               <span>Admin</span>
 
-            </div>
+        </div>
 
         </div>
 
@@ -112,8 +110,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
                 </div>
                 <div>
                     <h4>Total Policies</h4>
-                    <h2>1,245</h2>
-                    <a href="#">View all</a>
+                    <h2 id="totalPolicies">0</h2>
+
+                    <a href="/policies">View all</a>
                 </div>
             </div>
 
@@ -123,8 +122,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
                 </div>
                 <div>
                     <h4>Active Policies</h4>
-                    <h2>987</h2>
-                    <a href="#">View all</a>
+                    <h2 id="activePolicies">0</h2>
+
+                    <a href="/policies">View all</a>
                 </div>
             </div>
 
@@ -134,8 +134,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
                 </div>
                 <div>
                     <h4>Total Claims</h4>
-                    <h2>256</h2>
-                    <a href="#">View all</a>
+                    <h2 id="totalClaims">0</h2>
+
+                    <a href="/claims">View all</a>
                 </div>
             </div>
 
@@ -145,8 +146,8 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
                 </div>
                 <div>
                     <h4>Total Customers</h4>
-                    <h2>2,341</h2>
-                    <a href="#">View all</a>
+                    <h2 id="totalCustomers">0</h2>
+                    <a href="/members">View all</a>
                 </div>
             </div>
 
@@ -213,7 +214,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
                     <tr>
                         <td>CLM1001</td>
-                        <td>John Doe</td>
+                        <td>Brahma Teja</td>
                         <td>POL123456</td>
                         <td>2024-05-20</td>
                         <td><span class="approved">Approved</span></td>
@@ -221,7 +222,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
                     <tr>
                         <td>CLM1002</td>
-                        <td>Jane Smith</td>
+                        <td>Ramesh</td>
                         <td>POL123457</td>
                         <td>2024-05-19</td>
                         <td><span class="pending">Pending</span></td>
@@ -229,7 +230,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
                     <tr>
                         <td>CLM1003</td>
-                        <td>Robert Brown</td>
+                        <td>jassu</td>
                         <td>POL123458</td>
                         <td>2024-05-18</td>
                         <td><span class="rejected">Rejected</span></td>
@@ -298,6 +299,36 @@ borderRadius:8
 });
 </script>
 
+<!-- Notification Popup -->
+
+<div id="notificationPopup" class="notification-popup">
+
+    <h4>Notifications</h4>
+
+    <p>✅ New Policy Added</p>
+
+    <p>📄 Claim Approved</p>
+
+    <p>💰 Premium Collection Updated</p>
+
+</div>
+
+<!-- Admin Menu -->
+
+<div id="adminMenu" class="admin-menu">
+
+    <a href="/settings">
+        ⚙ Settings
+    </a>
+
+    <a href="/">
+        🚪 Logout
+    </a>
+
+</div>
+
+
+
 <!-- AI Concierge Button -->
 
 <div class="ai-concierge-btn" onclick="openAIConcierge()">
@@ -357,6 +388,52 @@ Send
 </div>
 
 <script>
+
+
+function toggleNotifications(){
+
+const popup =
+document.getElementById("notificationPopup");
+
+popup.style.display =
+popup.style.display === "block"
+? "none"
+: "block";
+
+}
+
+function toggleAdminMenu(){
+
+const menu =
+document.getElementById("adminMenu");
+
+menu.style.display =
+menu.style.display === "block"
+? "none"
+: "block";
+
+}
+
+document.addEventListener("click",function(e){
+
+if(
+!e.target.closest(".notification-box")
+){
+document.getElementById(
+"notificationPopup"
+).style.display="none";
+}
+
+if(
+!e.target.closest(".avatar")
+){
+document.getElementById(
+"adminMenu"
+).style.display="none";
+}
+
+});	
+
 
 function openAIConcierge(){
 document.getElementById("aiConcierge").style.display="flex";
@@ -454,6 +531,50 @@ sendMessage();
 
 recognition.start();
 }
+
+/* Dashboard Search */
+
+document
+.getElementById("dashboardSearch")
+.addEventListener("keyup", function(){
+
+let value =
+this.value.toLowerCase();
+
+document
+.querySelectorAll(".card")
+.forEach(card=>{
+
+const text =
+card.innerText.toLowerCase();
+
+card.style.display =
+text.includes(value)
+? "flex"
+: "none";
+
+});
+
+});
+
+
+fetch('/api/dashboard')
+.then(res => res.json())
+.then(data => {
+
+document.getElementById('totalPolicies')
+.innerText = data.totalPolicies;
+
+document.getElementById('activePolicies')
+.innerText = data.activePolicies;
+
+document.getElementById('totalClaims')
+.innerText = data.totalClaims;
+
+document.getElementById('totalCustomers')
+.innerText = data.totalCustomers;
+
+});
 
 </script>
 </body>
