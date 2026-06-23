@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Active Policies</title>
+<link rel="stylesheet" href="/pages.css">
+</head>
+<body>
+
+<div class="page-container">
+
+<h1>Active Policies</h1>
+
+<div class="card">
+
+<table>
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Policy Name</th>
+<th>Premium</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody id="policyTable">
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+fetch('/api/active-policies')
+.then(res=>res.json())
+.then(data=>{
+
+let html='';
+
+data.forEach(policy=>{
+
+html+=`
+<tr>
+<td>${policy.id}</td>
+<td>${policy.policy_name}</td>
+<td>₹${policy.premium}</td>
+<td>
+<span class="active">
+${policy.status}
+</span>
+</td>
+</tr>
+`;
+
+});
+
+document.getElementById('policyTable').innerHTML=html;
+
+});
+
+</script>
+
+</body>
+</html>

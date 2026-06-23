@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Claims</title>
+<title>Claims Management</title>
 <link rel="stylesheet" href="/pages.css">
 </head>
 <body>
@@ -14,33 +14,58 @@
 
 <div class="header-row">
 <h2>Recent Claims</h2>
-<button>New Claim</button>
+
+<button onclick="document.getElementById('claimForm').style.display='block'">
+New Claim
+</button>
+
 </div>
 
-<table>
+<div id="claimForm" style="display:none;margin-bottom:20px;">
+
+<form action="/add-claim" method="POST">
+
+<input
+type="text"
+name="customer"
+placeholder="Customer Name"
+required>
+
+<br><br>
+
+<input
+type="text"
+name="policy_number"
+placeholder="Policy Number"
+required>
+
+<br><br>
+
+<select name="status">
+
+<option value="Pending">Pending</option>
+<option value="Approved">Approved</option>
+<option value="Rejected">Rejected</option>
+
+</select>
+
+<br><br>
+
+<button type="submit">
+Submit Claim
+</button>
+
+</form>
+
+</div>
+
+<table id="claimsTable">
 
 <tr>
 <th>Claim ID</th>
 <th>Customer</th>
+<th>Policy Number</th>
 <th>Status</th>
-</tr>
-
-<tr>
-<td>CLM1001</td>
-<td>John Doe</td>
-<td><span class="active">Approved</span></td>
-</tr>
-
-<tr>
-<td>CLM1002</td>
-<td>Jane Smith</td>
-<td><span class="pending">Pending</span></td>
-</tr>
-
-<tr>
-<td>CLM1003</td>
-<td>Robert Brown</td>
-<td><span class="rejected">Rejected</span></td>
 </tr>
 
 </table>
@@ -48,6 +73,40 @@
 </div>
 
 </div>
+
+<script>
+
+fetch('/api/claims')
+.then(res => res.json())
+.then(data => {
+
+let html = `
+<tr>
+<th>Claim ID</th>
+<th>Customer</th>
+<th>Policy Number</th>
+<th>Status</th>
+</tr>
+`;
+
+data.forEach(claim => {
+
+html += `
+<tr>
+<td>CLM${claim.id}</td>
+<td>${claim.customer}</td>
+<td>${claim.policy_number}</td>
+<td>${claim.status}</td>
+</tr>
+`;
+
+});
+
+document.getElementById('claimsTable').innerHTML = html;
+
+});
+
+</script>
 
 </body>
 </html>

@@ -50,3 +50,11 @@
 .member-table th{
     background:#f8fafc;
 }
+
+select{
+width:100%;
+padding:14px;
+margin-bottom:15px;
+border:1px solid #ddd;
+border-radius:10px;
+}

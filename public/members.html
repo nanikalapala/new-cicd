@@ -1,70 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Members</title>
 <link rel="stylesheet" href="/members.css">
+</head>
+
+<body>
+
 <div class="member-form">
 
-    <h2>Add New Member</h2>
+<h2>Add New Member</h2>
 
-    <form action="/add-member" method="POST">
+<form action="/add-member" method="POST">
 
-        <input
-        type="text"
-        name="fullname"
-        placeholder="Full Name"
-        required>
+<input
+type="text"
+name="name"
+placeholder="Full Name"
+required>
 
-        <input
-        type="email"
-        name="email"
-        placeholder="Email"
-        required>
+<input
+type="email"
+name="email"
+placeholder="Email"
+required>
 
-        <input
-        type="text"
-        name="phone"
-        placeholder="Phone Number"
-        required>
+<input
+type="text"
+name="phone"
+placeholder="Phone Number"
+required>
 
-        <input
-        type="text"
-        name="policy_type"
-        placeholder="Policy Type"
-        required>
+<select
+name="policy"
+required>
 
-        <button type="submit">
-            Add Member
-        </button>
+<option value="">
+Select Policy
+</option>
 
-    </form>
+<option>
+Health Insurance
+</option>
+
+<option>
+Life Insurance
+</option>
+
+<option>
+Vehicle Insurance
+</option>
+
+<option>
+Family Health Plan
+</option>
+
+</select>
+
+<button type="submit">
+Add Member
+</button>
+
+</form>
 
 </div>
 
 <div class="member-table">
 
-    <h2>Member Records</h2>
+<h2>Member Records</h2>
 
-    <table>
+<table id="memberTable">
 
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Policy</th>
-            </tr>
-        </thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Email</th>
+<th>Phone</th>
+<th>Policy</th>
+</tr>
 
-        <tbody id="memberData">
-
-            <tr>
-                <td>1</td>
-                <td>John Doe</td>
-                <td>john@gmail.com</td>
-                <td>9876543210</td>
-                <td>Health Insurance</td>
-            </tr>
-
-        </tbody>
-
-    </table>
+</table>
 
 </div>
+
+<script>
+
+fetch('/api/members')
+.then(res => res.json())
+.then(data => {
+
+let html = `
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Email</th>
+<th>Phone</th>
+<th>Policy</th>
+</tr>
+`;
+
+data.forEach(member => {
+
+html += `
+<tr>
+<td>${member.id}</td>
+<td>${member.name || ''}</td>
+<td>${member.email || ''}</td>
+<td>${member.phone || ''}</td>
+<td>${member.policy || ''}</td>
+</tr>
+`;
+
+});
+
+document.getElementById('memberTable').innerHTML = html;
+
+});
+
+</script>
+
+</body>
+</html>

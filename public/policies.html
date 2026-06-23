@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Policies</title>
+<title>Policies Management</title>
 <link rel="stylesheet" href="/pages.css">
 </head>
 <body>
@@ -14,44 +14,122 @@
 
 <div class="header-row">
 <h2>All Policies</h2>
-<button>Add Policy</button>
+
+<button onclick="showForm()">
+Add Policy
+</button>
+</div>
+
+<div id="policyForm" style="display:none;margin-bottom:20px;">
+
+<form action="/add-policy" method="POST">
+
+<input
+type="text"
+name="policy_name"
+placeholder="Policy Name"
+required>
+
+<br><br>
+
+<input
+type="number"
+name="premium"
+placeholder="Premium"
+required>
+
+<br><br>
+
+<select name="status">
+
+<option value="Active">
+Active
+</option>
+
+<option value="Pending">
+Pending
+</option>
+
+<option value="Expired">
+Expired
+</option>
+
+</select>
+
+<br><br>
+
+<button type="submit">
+Save Policy
+</button>
+
+</form>
+
 </div>
 
 <table>
 
+<thead>
 <tr>
 <th>ID</th>
 <th>Policy Name</th>
 <th>Premium</th>
 <th>Status</th>
 </tr>
+</thead>
 
-<tr>
-<td>POL1001</td>
-<td>Health Insurance</td>
-<td>₹10,000</td>
-<td><span class="active">Active</span></td>
-</tr>
-
-<tr>
-<td>POL1002</td>
-<td>Life Insurance</td>
-<td>₹15,000</td>
-<td><span class="active">Active</span></td>
-</tr>
-
-<tr>
-<td>POL1003</td>
-<td>Vehicle Insurance</td>
-<td>₹8,000</td>
-<td><span class="pending">Pending</span></td>
-</tr>
+<tbody id="policyTable">
+</tbody>
 
 </table>
 
 </div>
 
 </div>
+
+<script>
+
+function showForm(){
+document.getElementById('policyForm').style.display='block';
+}
+
+fetch('/api/policies')
+.then(res=>res.json())
+.then(data=>{
+
+let html='';
+
+data.forEach(policy=>{
+
+let badge='active';
+
+if(policy.status==='Pending'){
+badge='pending';
+}
+
+if(policy.status==='Expired'){
+badge='expired';
+}
+
+html+=`
+<tr>
+<td>${policy.id}</td>
+<td>${policy.policy_name}</td>
+<td>₹${policy.premium}</td>
+<td>
+<span class="${badge}">
+${policy.status}
+</span>
+</td>
+</tr>
+`;
+
+});
+
+document.getElementById('policyTable').innerHTML=html;
+
+});
+
+</script>
 
 </body>
 </html>

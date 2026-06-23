@@ -2,7 +2,8 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const db = require('./db');
-
+const PDFDocument = require('pdfkit');
+const ExcelJS = require('exceljs');
 const app = express();
 
 /* Middleware */
@@ -39,6 +40,10 @@ app.get('/payments', (req, res) => {
 
 app.get('/settings', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'settings.html'));
+});
+
+app.get('/reports', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'reports.html'));
 });
 
 app.get('/profile', (req, res) => {
@@ -193,6 +198,75 @@ app.get('/api/members', (req, res) => {
 
 });
 
+/* Add Policy */
+
+app.post('/add-policy',(req,res)=>{
+
+const {
+policy_name,
+premium,
+status
+}=req.body;
+
+db.query(
+'INSERT INTO policies(policy_name,premium,status) VALUES(?,?,?)',
+[policy_name,premium,status],
+(err,result)=>{
+
+if(err){
+console.log(err);
+return res.send('Error Adding Policy');
+}
+
+res.redirect('/policies');
+
+});
+
+});
+
+/* Policies API */
+
+app.get('/api/policies',(req,res)=>{
+
+db.query(
+'SELECT * FROM policies',
+(err,result)=>{
+
+if(err){
+console.log(err);
+return res.json([]);
+}
+
+res.json(result);
+
+});
+
+});
+
+app.post('/add-claim',(req,res)=>{
+
+const {
+customer,
+policy_number,
+status
+} = req.body;
+
+db.query(
+'INSERT INTO claims(customer,policy_number,status) VALUES(?,?,?)',
+[customer,policy_number,status],
+(err)=>{
+
+if(err){
+console.log(err);
+return res.send('Error');
+}
+
+res.redirect('/claims');
+
+});
+
+});
+
 /* Health Check */
 
 app.get('/health', (req, res) => {
@@ -204,6 +278,107 @@ app.get('/health', (req, res) => {
     });
 
 });
+
+app.get('/active-policies',(req,res)=>{
+res.sendFile(
+path.join(__dirname,'public','active-policies.html')
+);
+});
+
+app.get('/api/active-policies',(req,res)=>{
+
+db.query(
+"SELECT * FROM policies WHERE status='Active'",
+(err,result)=>{
+
+if(err){
+return res.json([]);
+}
+
+res.json(result);
+
+});
+
+});
+
+app.get('/export/pdf', (req, res) => {
+
+    const doc = new PDFDocument();
+
+    res.setHeader(
+        'Content-Type',
+        'application/pdf'
+    );
+
+    res.setHeader(
+        'Content-Disposition',
+        'attachment; filename=insurance-report.pdf'
+    );
+
+    doc.pipe(res);
+
+    doc.fontSize(24)
+       .text('Insurance Portal Report');
+
+    doc.moveDown();
+
+    doc.text('Total Policies: 10');
+    doc.text('Active Policies: 6');
+    doc.text('Total Claims: 8');
+    doc.text('Total Customers: 11');
+
+    doc.end();
+
+});
+
+app.get('/export/excel', async (req, res) => {
+
+    const workbook = new ExcelJS.Workbook();
+
+    const sheet =
+    workbook.addWorksheet('Insurance Report');
+
+    sheet.columns = [
+        { header:'Metric', key:'metric' },
+        { header:'Value', key:'value' }
+    ];
+
+    sheet.addRow({
+        metric:'Policies',
+        value:10
+    });
+
+    sheet.addRow({
+        metric:'Active Policies',
+        value:6
+    });
+
+    sheet.addRow({
+        metric:'Claims',
+        value:8
+    });
+
+    sheet.addRow({
+        metric:'Customers',
+        value:11
+    });
+
+    res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+
+    res.setHeader(
+        'Content-Disposition',
+        'attachment; filename=insurance-report.xlsx'
+    );
+
+    await workbook.xlsx.write(res);
+
+    res.end();
+
+});
+
 
 /* Start Server */
 

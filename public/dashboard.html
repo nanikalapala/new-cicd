@@ -47,7 +47,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
                 Customers
             </a>
 
-            <a href="#">
+            <a href="/reports">
                 <i class="fa-solid fa-file-lines"></i>
                 Reports
             </a>
@@ -124,7 +124,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
                     <h4>Active Policies</h4>
                     <h2 id="activePolicies">0</h2>
 
-                    <a href="/policies">View all</a>
+                    <a href="/active-policies">View all</a>
                 </div>
             </div>
 
@@ -204,37 +204,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
                 <table>
 
-                    <tr>
-                        <th>Claim ID</th>
-                        <th>Customer</th>
-                        <th>Policy Number</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                    </tr>
+			<tbody id="dashboardClaims">
 
-                    <tr>
-                        <td>CLM1001</td>
-                        <td>Brahma Teja</td>
-                        <td>POL123456</td>
-                        <td>2024-05-20</td>
-                        <td><span class="approved">Approved</span></td>
-                    </tr>
-
-                    <tr>
-                        <td>CLM1002</td>
-                        <td>Ramesh</td>
-                        <td>POL123457</td>
-                        <td>2024-05-19</td>
-                        <td><span class="pending">Pending</span></td>
-                    </tr>
-
-                    <tr>
-                        <td>CLM1003</td>
-                        <td>jassu</td>
-                        <td>POL123458</td>
-                        <td>2024-05-18</td>
-                        <td><span class="rejected">Rejected</span></td>
-                    </tr>
+			</tbody> 
 
                 </table>
 
@@ -575,6 +547,43 @@ document.getElementById('totalCustomers')
 .innerText = data.totalCustomers;
 
 });
+
+fetch('/api/claims')
+.then(res => res.json())
+.then(data => {
+
+let html = '';
+
+data.forEach(claim => {
+
+let badge='';
+
+if(claim.status==='Approved'){
+    badge='<span class="approved">Approved</span>';
+}
+else if(claim.status==='Pending'){
+    badge='<span class="pending">Pending</span>';
+}
+else{
+    badge='<span class="rejected">Rejected</span>';
+}
+
+html += `
+<tr>
+<td>CLM${claim.id}</td>
+<td>${claim.customer}</td>
+<td>${claim.policy_number}</td>
+<td>${new Date().toISOString().split('T')[0]}</td>
+<td>${badge}</td>
+</tr>
+`;
+
+});
+
+document.getElementById('dashboardClaims').innerHTML = html;
+
+});
+
 
 </script>
 </body>
