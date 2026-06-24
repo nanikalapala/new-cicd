@@ -1,4 +1,4 @@
-iname: Insurance Portal CI/CD
+name: Insurance Portal CI/CD
 
 on:
   push:
