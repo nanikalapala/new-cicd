@@ -1,124 +1,118 @@
-name: Insurance Portal CI/CD
+iname: Insurance Portal CI/CD
 
 on:
-push:
-branches:
-- master
-- main
-- develop
+  push:
+    branches:
+      - master
+      - main
+      - develop
 
-pull_request:
-branches:
-- master
-- main
+  pull_request:
+    branches:
+      - master
+      - main
 
-workflow_dispatch:
+  workflow_dispatch:
 
 env:
-REGISTRY: docker.io
-IMAGE_NAME: insurance-portal
+  REGISTRY: docker.io
+  IMAGE_NAME: insurance-portal
 
 jobs:
 
-quality-security-checks:
-runs-on: ubuntu-latest
+  quality-security-checks:
+    runs-on: ubuntu-latest
 
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-  - name: Checkout Code
-    uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: npm ci
 
-  - name: Setup Node.js
-    uses: actions/setup-node@v4
-    with:
-      node-version: '20'
+      - name: Validate JavaScript Syntax
+        run: node --check server.js
 
-  - name: Install Dependencies
-    run: npm ci
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-  - name: Validate JavaScript Syntax
-    run: node --check server.js
+      - name: Trivy Filesystem Scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
 
-  - name: SonarQube Scan
-    uses: SonarSource/sonarqube-scan-action@v5
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  build-and-push:
+    needs: quality-security-checks
+    runs-on: ubuntu-latest
 
-  - name: Trivy Filesystem Scan
-    uses: aquasecurity/trivy-action@0.28.0
-    with:
-      scan-type: fs
-      scan-ref: .
-      severity: HIGH,CRITICAL
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
 
-build-and-push:
-needs: quality-security-checks
-runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-steps:
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest .
 
-  - name: Checkout Code
-    uses: actions/checkout@v4
+      - name: Trivy Image Scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
+          severity: HIGH,CRITICAL
 
-  - name: Set up Docker Buildx
-    uses: docker/setup-buildx-action@v3
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
 
-  - name: Login to Docker Hub
-    uses: docker/login-action@v3
-    with:
-      username: ${{ secrets.DOCKER_USERNAME }}
-      password: ${{ secrets.DOCKER_PASSWORD }}
+  deploy-to-ec2:
+    needs: build-and-push
+    runs-on: ubuntu-latest
 
-  - name: Build Docker Image
-    run: |
-      docker build -t ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest .
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
 
-  - name: Trivy Image Scan
-    uses: aquasecurity/trivy-action@0.28.0
-    with:
-      image-ref: ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
-      severity: HIGH,CRITICAL
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
 
-  - name: Push Docker Image
-    run: |
-      docker push ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
 
-deploy-to-ec2:
-needs: build-and-push
-runs-on: ubuntu-latest
+            docker stop insurance-app || true
+            docker rm insurance-app || true
 
-if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+            docker image prune -f || true
 
-steps:
+            docker run -d \
+              --name insurance-app \
+              --restart unless-stopped \
+              -p 80:3000 \
+              -e NODE_ENV=production \
+              ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
 
-  - name: Deploy via SSH
-    uses: appleboy/ssh-action@v1.0.3
+            sleep 10
 
-    with:
-      host: ${{ secrets.EC2_HOST }}
-      username: ubuntu
-      key: ${{ secrets.EC2_SSH_KEY }}
-
-      script: |
-        docker pull ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
-
-        docker stop insurance-app || true
-        docker rm insurance-app || true
-
-        docker image prune -f || true
-
-        docker run -d \
-          --name insurance-app \
-          --restart unless-stopped \
-          -p 80:3000 \
-          -e NODE_ENV=production \
-          ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
-
-        sleep 10
-
-        docker ps | grep insurance-app
+            docker ps | grep insurance-app
