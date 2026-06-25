@@ -54,7 +54,7 @@ jobs:
       ####################################################
 
       - name: Semgrep Scan
-        uses: semgrep/semgrep-action@master
+        uses: semgrep/semgrep-action@v1.167.0
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
