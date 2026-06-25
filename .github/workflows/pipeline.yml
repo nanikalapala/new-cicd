@@ -1,5 +1,9 @@
 name: Insurance Portal CI/CD
 
+permissions:
+  contents: read
+  issues: write
+
 on:
   push:
     branches:
