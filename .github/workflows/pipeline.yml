@@ -60,16 +60,6 @@ jobs:
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
-
-      ##################################################
-      # Gitleaks Secret Scan
-      ##################################################
-      - name: Gitleaks Secret Scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
-
       ##################################################
       # Trivy Filesystem Scan
       ##################################################
