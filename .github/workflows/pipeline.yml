@@ -139,7 +139,7 @@ jobs:
             docker run -d \
               --name insurance-app \
               --restart unless-stopped \
-              -p 80:3000 \
+              -p 3000:3000 \
               -e NODE_ENV=production \
               ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
 
