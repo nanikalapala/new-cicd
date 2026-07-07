@@ -61,6 +61,16 @@ jobs:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
       ##################################################
+      # Snyk Dependency Scan
+      ##################################################
+      - name: Snyk Dependency Scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+
+      ##################################################
       # Trivy Filesystem Scan
       ##################################################
       - name: Trivy Filesystem Scan
@@ -96,6 +106,16 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest .
+
+      ##################################################
+      # Snyk Container Scan
+      ##################################################
+      - name: Snyk Container Scan
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{ secrets.DOCKER_USERNAME }}/insurance-portal:latest
 
       ##################################################
       # Trivy Docker Image Scan
