@@ -4,7 +4,22 @@ const bodyParser = require('body-parser');
 const db = require('./db');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
+
+const cookieParser = require('cookie-parser');
+const csurf = require('csurf');
+
 const app = express();
+
+app.disable('x-powered-by');
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+app.use(cookieParser());
+
+const csrfProtection = csurf({
+    cookie: true
+});
 
 /* Middleware */
 
@@ -14,8 +29,10 @@ app.use(express.static('public'));
 
 /* Pages */
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('/', csrfProtection, (req, res) => {
+    res.render('index', {
+        csrfToken: req.csrfToken()
+    });
 });
 
 app.get('/dashboard', (req, res) => {
@@ -72,7 +89,7 @@ app.get('/login-failed', (req, res) => {
 
 /* Login */
 
-app.post('/login', (req, res) => {
+app.post('/login', csrfProtection, (req, res) => {
 
     const { email, password } = req.body;
 
