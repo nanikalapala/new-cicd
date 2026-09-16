@@ -92,6 +92,7 @@ app.get('/login-failed', (req, res) => {
 app.post('/login', csrfProtection, (req, res) => {
 
     const { email, password } = req.body;
+    const srcip = req.ip;
 
     db.query(
         'SELECT * FROM users WHERE email=? AND password=?',
@@ -99,44 +100,28 @@ app.post('/login', csrfProtection, (req, res) => {
         (err, result) => {
 
             if (err) {
-                console.log(err);
+                console.error(
+                    `AUTH_ERROR event=login database_error=true email=${email} srcip=${srcip}`
+                );
                 return res.send('Database Error');
             }
 
             if (result.length > 0) {
+                console.log(
+                    `AUTH_SUCCESS event=login email=${email} srcip=${srcip}`
+                );
                 return res.redirect('/dashboard');
             }
+
+            console.log(
+                `AUTH_FAILURE event=login email=${email} srcip=${srcip}`
+            );
 
             return res.redirect('/login-failed');
         }
     );
 });
 
-/* Add Member */
-
-app.post('/add-member', (req, res) => {
-
-    const {
-        name,
-        email,
-        phone,
-        policy
-    } = req.body;
-
-    db.query(
-        'INSERT INTO members(name,email,phone,policy) VALUES(?,?,?,?)',
-        [name, email, phone, policy],
-        (err) => {
-
-            if (err) {
-                console.log(err);
-                return res.send('Error adding member');
-            }
-
-            res.redirect('/members');
-        }
-    );
-});
 
 /* Dashboard API */
 
@@ -404,3 +389,4 @@ const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Insurance Portal running on port ${PORT}`);
 });
+// FIM security test
