@@ -1,0 +1,241 @@
+name: AI DevSecOps Security Report Only
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ai-security-report:
+    name: Scan, sanitize and generate AI report
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # The AWS OIDC trust policy permits master only.
+    if: github.ref == 'refs/heads/master'
+
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      AWS_REGION: ap-southeast-2
+      AWS_ROLE_ARN: arn:aws:iam::640759203662:role/GitHubActions-AI-DevSecOps-ReportOnly
+      S3_BUCKET: new-cicd-ai-devsecops-reports-640759203662
+      EC2_INSTANCE_ID: i-0967f2c7fde096597
+      SSM_DOCUMENT: AI-DevSecOps-ReportOnly
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Verify scanner tools
+        run: |
+          docker --version
+          aws --version
+          python3 --version
+
+      - name: Run Trivy filesystem scan
+        run: |
+          set -euo pipefail
+
+          docker run --rm \
+            -v "$PWD:/repo" \
+            aquasec/trivy:0.58.2 \
+            fs \
+            --scanners vuln \
+            --format json \
+            --output /repo/trivy.json \
+            /repo
+
+          test -s trivy.json
+
+      - name: Run Gitleaks scan
+        run: |
+          set -euo pipefail
+
+          docker run --rm \
+            -v "$PWD:/repo" \
+            zricethezav/gitleaks:v8.24.2 \
+            detect \
+            --source=/repo \
+            --report-format=json \
+            --report-path=/repo/gitleaks.json \
+            --exit-code=0
+
+          test -s gitleaks.json
+
+          python3 -c '
+          import json
+          with open("gitleaks.json", encoding="utf-8") as f:
+              data = json.load(f)
+          if not isinstance(data, list):
+              raise SystemExit("Invalid Gitleaks JSON format")
+          print(f"Gitleaks findings: {len(data)}")
+          '
+
+      - name: Sanitize scanner findings
+        run: |
+          set -euo pipefail
+
+          python3 scripts/sanitize_security_findings.py \
+            --trivy trivy.json \
+            --gitleaks gitleaks.json \
+            --output sanitized-findings.json
+
+          test -s sanitized-findings.json
+
+          echo "Sanitized finding count:"
+          python3 -c '
+          import json
+          with open("sanitized-findings.json", encoding="utf-8") as f:
+              data = json.load(f)
+          print(len(data.get("findings", [])))
+          '
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          allowed_root = {"findings"}
+          allowed_finding = {
+              "scanner", "rule_id", "severity", "location",
+              "package", "installed_version", "fixed_version"
+          }
+
+          data = json.loads(Path("sanitized-findings.json").read_text())
+
+          if set(data) != allowed_root:
+              raise SystemExit("Unexpected top-level JSON fields")
+
+          for finding in data["findings"]:
+              if not isinstance(finding, dict):
+                  raise SystemExit("Invalid finding structure")
+              unexpected = set(finding) - allowed_finding
+              if unexpected:
+                  raise SystemExit(f"Unexpected finding fields: {unexpected}")
+
+          print("PASS: Sanitized JSON contains only approved fields.")
+          PY
+
+      - name: Configure AWS credentials using GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubAIReport-${{ github.run_id }}
+
+      - name: Upload sanitized findings to S3
+        id: upload
+        run: |
+          set -euo pipefail
+
+          INPUT_KEY="inputs/findings-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
+
+          aws s3 cp sanitized-findings.json \
+            "s3://${S3_BUCKET}/${INPUT_KEY}" \
+            --only-show-errors
+
+          echo "input_key=${INPUT_KEY}" >> "$GITHUB_OUTPUT"
+          echo "Sanitized input uploaded."
+
+      - name: Invoke EC2 report-only SSM document
+        id: ssm
+        env:
+          INPUT_KEY: ${{ steps.upload.outputs.input_key }}
+        run: |
+          set -euo pipefail
+
+          COMMAND_ID=$(aws ssm send-command \
+            --document-name "$SSM_DOCUMENT" \
+            --document-version "3" \
+            --instance-ids "$EC2_INSTANCE_ID" \
+            --parameters "{\"S3Key\":[\"${INPUT_KEY}\"]}" \
+            --comment "GitHub Actions AI DevSecOps report-only run ${GITHUB_RUN_ID}" \
+            --query 'Command.CommandId' \
+            --output text)
+
+          if [ -z "$COMMAND_ID" ] || [ "$COMMAND_ID" = "None" ]; then
+            echo "SSM did not return a command ID."
+            exit 1
+          fi
+
+          echo "command_id=${COMMAND_ID}" >> "$GITHUB_OUTPUT"
+          echo "SSM command submitted: ${COMMAND_ID}"
+
+      - name: Wait for SSM and retrieve report
+        env:
+          COMMAND_ID: ${{ steps.ssm.outputs.command_id }}
+        run: |
+          set -euo pipefail
+
+          STATUS="Pending"
+          OUTPUT=""
+
+          for attempt in $(seq 1 180); do
+            INVOCATION=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --output json 2>/dev/null || true)
+
+            if [ -n "$INVOCATION" ]; then
+              STATUS=$(printf '%s' "$INVOCATION" | \
+                python3 -c 'import json,sys; print(json.load(sys.stdin).get("Status","Unknown"))')
+
+              OUTPUT=$(printf '%s' "$INVOCATION" | \
+                python3 -c 'import json,sys; print(json.load(sys.stdin).get("StandardOutputContent",""))')
+
+              echo "SSM status: ${STATUS}"
+
+              case "$STATUS" in
+                Success)
+                  break
+                  ;;
+                Failed|TimedOut|Cancelled)
+                  echo "SSM execution failed."
+                  echo "$OUTPUT"
+                  exit 1
+                  ;;
+              esac
+            fi
+
+            sleep 5
+          done
+
+          if [ "$STATUS" != "Success" ]; then
+            echo "Timed out waiting for SSM. Last status: ${STATUS}"
+            exit 1
+          fi
+
+          echo "$OUTPUT"
+
+          REPORT_KEY=$(printf '%s\n' "$OUTPUT" | \
+            sed -n 's/^AI_REPORT_S3_KEY=//p' | tail -n 1)
+
+          if [[ ! "$REPORT_KEY" =~ ^reports/[A-Za-z0-9._-]+\.md$ ]]; then
+            echo "Could not identify a valid report key in SSM output."
+            exit 1
+          fi
+
+          aws s3 cp "s3://${S3_BUCKET}/${REPORT_KEY}" \
+            ai-security-report.md \
+            --only-show-errors
+
+          test -s ai-security-report.md
+          echo "Report successfully retrieved."
+
+      - name: Upload AI security report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-devsecops-security-report
+          path: ai-security-report.md
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove raw scanner files
+        if: always()
+        run: |
+          rm -f trivy.json gitleaks.json sanitized-findings.json
